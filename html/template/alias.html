@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <head>
+        <title>BC</title>
+    </head>
+
+    <body>
+        <h1>BC</h1>
+        <p>Welcome to BC</p>
+        <p>Register Alias;</p>
+        <form action="alias" method="POST">
+            Alias
+            <br>
+            <textarea name="alias" rows="1" cols="60">{{ .Alias }}</textarea>
+            <br>
+            Public Key
+            <br>
+            <textarea name="publicKey" rows="15" cols="60">{{ .PublicKey }}</textarea>
+            <br>
+            <br>
+            <input type="submit" value="Register">
+        </form>
+    </body>
+</html>
