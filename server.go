@@ -42,7 +42,6 @@ func main() {
 		Keys: make(map[string]*bcgo.KeyShare),
 	}
 	http.HandleFunc("/keys", ks.HandleKeys)
-	http.HandleFunc("/status", bcnetgo.HandleStatus)
 	store, err := bcnetgo.GetSecurityStore()
 	if err != nil {
 		log.Println(err)
@@ -163,7 +162,7 @@ func HandleAlias(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Mine record into blockchain
-		hash, block, err := node.Mine(aliases, entries[:])
+		hash, block, err := node.MineRecords(aliases, entries[:])
 		if err != nil {
 			log.Println(err)
 			return
