@@ -36,25 +36,23 @@ func main() {
 	go bcnetgo.Bind(bcgo.PORT_HEAD, bcnetgo.HandleHead)
 
 	// Serve Web Requests
-	http.HandleFunc("/", bcnetgo.HandleStatic)
-	http.HandleFunc("/alias", HandleAlias)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", bcnetgo.HandleStatic)
+	mux.HandleFunc("/alias", HandleAlias)
 	ks := &bcnetgo.KeyStore{
 		Keys: make(map[string]*bcgo.KeyShare),
 	}
-	http.HandleFunc("/keys", ks.HandleKeys)
+	mux.HandleFunc("/keys", ks.HandleKeys)
 	store, err := bcnetgo.GetSecurityStore()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	// Serve HTTPS HTML Requests
-	go log.Fatal(http.ListenAndServeTLS(":443", path.Join(store, "fullchain.pem"), path.Join(store, "privkey.pem"), nil))
-	// Redirect HTTP HTML Requests to HTTPS
-	log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect)))
-	/*
-		// Serve HTTP HTML Requests
-		log.Fatal(http.ListenAndServe(":80", nil))
-	*/
+	// Serve HTTPS Requests
+	log.Fatal(http.ListenAndServeTLS(":443", path.Join(store, "fullchain.pem"), path.Join(store, "privkey.pem"), mux))
+
+	// TODO Redirect HTTP Requests to HTTPS
+	// log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect)))
 }
 
 func HandleAlias(w http.ResponseWriter, r *http.Request) {
