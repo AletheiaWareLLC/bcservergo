@@ -34,6 +34,8 @@ func main() {
 	go bcnetgo.Bind(bcgo.PORT_BLOCK, bcnetgo.HandleBlock)
 	// Serve Head Requests
 	go bcnetgo.Bind(bcgo.PORT_HEAD, bcnetgo.HandleHead)
+	// Serve Block Updates
+	go bcnetgo.Bind(bcgo.PORT_MULTICAST, bcnetgo.HandleUpdate)
 
 	// Serve Web Requests
 	mux := http.NewServeMux()
@@ -57,6 +59,11 @@ func main() {
 
 func HandleAlias(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
+	aliases, err := aliasgo.OpenAliasChannel()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	switch r.Method {
 	case "GET":
 		query := r.URL.Query()
@@ -65,6 +72,11 @@ func HandleAlias(w http.ResponseWriter, r *http.Request) {
 			a = results[0]
 		}
 		log.Println("Alias", a)
+		if err := aliasgo.UniqueAlias(aliases, a); err != nil {
+			log.Println(err)
+			// TODO warn user
+			return
+		}
 		var publicKey string
 		if results, ok := query["publicKey"]; ok && len(results) == 1 {
 			publicKey = results[0]
@@ -101,6 +113,11 @@ func HandleAlias(w http.ResponseWriter, r *http.Request) {
 		log.Println("Signature", signature)
 		signatureAlgorithm := r.Form["signatureAlgorithm"]
 		log.Println("SignatureAlgorithm", signatureAlgorithm)
+
+		if err := aliasgo.UniqueAlias(aliases, a[0]); err != nil {
+			log.Println(err)
+			return
+		}
 
 		pubKey, err := base64.RawURLEncoding.DecodeString(publicKey[0])
 		if err != nil {
@@ -153,19 +170,16 @@ func HandleAlias(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		aliases, err := aliasgo.OpenAliasChannel()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
 		// Mine record into blockchain
 		hash, block, err := node.MineRecords(aliases, entries[:])
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		node.Multicast(aliases, hash, block)
+		if err := aliases.Multicast(hash, block); err != nil {
+			log.Println(err)
+			return
+		}
 	default:
 		log.Println("Unsupported method", r.Method)
 	}
