@@ -12,17 +12,19 @@
         <p>Welcome to BC, please follow the steps below to get setup;</p>
         <ol>
             <li>
+                <h2>Download</h2>
                 <p>Get BC for your device;</p>
                 <ul>
                     <li>Android - <a href="https://play.google.com/store/apps/details?id=com.aletheiaware.bc.android">Google Play Store</a> or <a download href="BCAndroid.apk">APK</a></li>
                     <li>iOS - coming soon!<!--<a download href="BC"></a>--></li>
                     <li>JVM - <a download href="BCJVM.jar">JAR</a></li>
-                    <li>Linux - ARM (<a download href="bcclientgo-linux-arm5">v5</a>, <a download href="bcclientgo-linux-arm6">v6</a>, <a download href="bcclientgo-linux-arm7">v7</a>, <a download href="bcclientgo-linux-arm8">v8</a>) or Intel/AMD (<a download href="bcclientgo-linux-386">32bit</a>, <a download href="bcclientgo-linux-amd64">64bit</a>)</li>
-                    <li>Mac - Intel/AMD (<a download href="bcclientgo-darwin-386">32bit</a>, <a download href="bcclientgo-darwin-amd64">64bit</a>)</li>
-                    <li>Windows - Intel/AMD (<a download href="bcclientgo-windows-386">32bit</a>, <a download href="bcclientgo-windows-amd64">64bit</a>)</li>
+                    <li>Linux - ARM (<a download="bc" href="bcclientgo-linux-arm5">v5</a>, <a download="bc" href="bcclientgo-linux-arm6">v6</a>, <a download="bc" href="bcclientgo-linux-arm7">v7</a>, <a download="bc" href="bcclientgo-linux-arm8">v8</a>) or Intel/AMD (<a download="bc" href="bcclientgo-linux-386">32bit</a>, <a download="bc" href="bcclientgo-linux-amd64">64bit</a>)</li>
+                    <li>Mac - Intel/AMD (<a download="bc" href="bcclientgo-darwin-386">32bit</a>, <a download="bc" href="bcclientgo-darwin-amd64">64bit</a>)</li>
+                    <li>Windows - Intel/AMD (<a download="bc.exe" href="bcclientgo-windows-386.exe">32bit</a>, <a download="bc.exe" href="bcclientgo-windows-amd64.exe">64bit</a>)</li>
                 </ul>
             </li>
             <li>
+                <h2>Initialize</h2>
                 <p>Generate your key pair consisting of a public key (which will be registered with your account) and a private key (which does not leave your possession).</p>
                 <pre><code>$> ./bc init</code></pre>
                 <samp>
@@ -43,6 +45,94 @@
                     Initialized as <strong>username</strong>
                     <br>
                 </samp>
+            </li>
+            <li>
+                <h2>Sample Usage</h2>
+                <p>Environment
+                    <ul>
+                        <li>
+                            <pre><code>$> ALIAS=alice ./space</code></pre>
+                            <p>Sets the alias for BC to load from the keystore.</p>
+                        </li>
+                        <li>
+                            <pre><code>$> CACHE=/tmp/cache ./space</code></pre>
+                            <p>Sets the directory for BC to use for caching.</p>
+                        </li>
+                        <li>
+                            <pre><code>$> KEYSTORE=~/keys ./space</code></pre>
+                            <p>Sets the directory for BC to use for storing keys.</p>
+                        </li>
+                        <li>
+                            <pre><code>$> PASSWORD=password1234 ./space</code></pre>
+                            <p>Sets the password for BC to unlock the private key from the keystore.</p>
+                            <p>Note: This is NOT advisable as your password will be stored in the command history, it is more secure to enter your password at the prompt.</p>
+                        </li>
+                        <li>
+                            <pre><code>$> PEERS=bc.aletheiaware.com ./space</code></pre>
+                            <p>Sets the peers for BC to communicate with.</p>
+                        </li>
+                    </ul>
+                </p>
+                <p>Commands
+                    <ul>
+                        <li>
+                            <pre><code>$> ./bc alias alice</code></pre>
+                            <p>Displays the public key registered with the given alias</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc block [channel] [hash]</code></pre>
+                            <p>Displays the block in the given channel with the given hash</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc head [channel]</code></pre>
+                            <p>Displays the head of the given channel</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc init</code></pre>
+                            <p>Init</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc node</code></pre>
+                            <p>Node</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc record</code></pre>
+                            <p>Record</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc sync</code></pre>
+                            <p>Sync</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc import-keys</code></pre>
+                            <p>Import Alias Keys from another device</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc export-keys</code></pre>
+                            <p>Export Alias Keys to another device</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc keystore</code></pre>
+                            <p>Keystore</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc peers</code></pre>
+                            <p>Peers</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc add-peer</code></pre>
+                            <p>Add-peer</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc cache</code></pre>
+                            <p>Cache</p>
+                        </li>
+                        <li>
+                            <pre><code>$> ./bc random</code></pre>
+                            <p>Random</p>
+                        </li>
+                    </ul>
+                </p>
             </li>
         </ol>
     </body>
