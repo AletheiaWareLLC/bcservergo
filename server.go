@@ -31,7 +31,7 @@ func main() {
 	// Serve Head Requests
 	go bcnetgo.Bind(bcgo.PORT_HEAD, bcnetgo.HandleHead)
 	// Serve Block Updates
-	go bcnetgo.Bind(bcgo.PORT_MULTICAST, bcnetgo.HandleUpdate)
+	go bcnetgo.Bind(bcgo.PORT_CAST, bcnetgo.HandleCast)
 
 	// Serve Web Requests
 	mux := http.NewServeMux()

@@ -1,0 +1,9 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="48" height="48">
+    <g fill="none" stroke="blue" stroke-linecap="butt" stroke-linejoin="bevel" stroke-width="1">
+        <polyline points="44,14 4,4 4,44 44,34" />
+    </g>
+    <g fill="none" stroke="red" stroke-linecap="butt" stroke-linejoin="bevel" stroke-width="1">
+        <polyline points="44,14 4,24 44,34" />
+    </g>
+</svg>
