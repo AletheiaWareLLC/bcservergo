@@ -25,7 +25,13 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	logFile, err := bcnetgo.SetupLogging()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer logFile.Close()
+
 	// Serve Block Requests
 	go bcnetgo.Bind(bcgo.PORT_BLOCK, bcnetgo.HandleBlock)
 	// Serve Head Requests
