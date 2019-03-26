@@ -21,6 +21,10 @@ Firewall (UFW)
 
     # Install firewall
     apt install ufw
+    # Allow http port
+    ufw allow 80
+    # Allow https port
+    ufw allow 443
     # Allow bc ports
     ufw allow 22222
     ufw allow 22322
@@ -52,6 +56,8 @@ BC
     # Initialize BC
     ALIAS=your_server_alias CACHE=~/bc/cache/ KEYSTORE=~/bc/keys/ LOGSTORE=~/bc/logs/ ~/bc/html/static/bcclient-linux-amd64 init
 
+    # Allow bcservergo to read security credentials
+    chown -R your_server_alias:your_server_alias /etc/letsencrypt/
     # Allow bcservergo to bind to port 443 (HTTPS)
     # This is required each time the server binary is updated
     setcap CAP_NET_BIND_SERVICE=+eip /home/your_server_alias/bc/bcservergo-linux-amd64
