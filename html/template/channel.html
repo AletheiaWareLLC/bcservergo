@@ -20,16 +20,16 @@
 
             <table>
                 <tr>
-                    <td>Alias</td>
-                    <td>{{ .Alias }}</td>
+                    <td>Channel</td>
+                    <td>{{ .Channel }}</td>
                 </tr>
                 <tr>
                     <td>Timestamp</td>
                     <td>{{ .Timestamp }}</td>
                 </tr>
                 <tr>
-                    <td>PublicKey</td>
-                    <td>{{ .PublicKey }}</td>
+                    <td>Head</td>
+                    <td><a href="block?channel={{ .Channel }}&hash={{ .Hash }}">{{ .Hash }}</a></td>
                 </tr>
             </table>
 

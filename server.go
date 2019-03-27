@@ -33,16 +33,19 @@ func main() {
 	defer logFile.Close()
 
 	// Serve Block Requests
-	go bcnetgo.Bind(bcgo.PORT_BLOCK, bcnetgo.HandleBlock)
+	go bcnetgo.Bind(bcgo.PORT_BLOCK, bcnetgo.HandleBlockPort)
 	// Serve Head Requests
-	go bcnetgo.Bind(bcgo.PORT_HEAD, bcnetgo.HandleHead)
+	go bcnetgo.Bind(bcgo.PORT_HEAD, bcnetgo.HandleHeadPort)
 	// Serve Block Updates
-	go bcnetgo.Bind(bcgo.PORT_CAST, bcnetgo.HandleCast)
+	go bcnetgo.Bind(bcgo.PORT_CAST, bcnetgo.HandleCastPort)
 
 	// Serve Web Requests
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", bcnetgo.HandleStatic)
 	mux.HandleFunc("/alias", bcnetgo.HandleAlias)
+	mux.HandleFunc("/alias-register", bcnetgo.HandleAliasRegister)
+	mux.HandleFunc("/block", bcnetgo.HandleBlock)
+	mux.HandleFunc("/channel", bcnetgo.HandleChannel)
 	ks := &bcnetgo.KeyStore{
 		Keys: make(map[string]*bcgo.KeyShare),
 	}
