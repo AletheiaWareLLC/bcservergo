@@ -39,6 +39,9 @@ func main() {
 	// Serve Block Updates
 	go bcnetgo.Bind(bcgo.PORT_CAST, bcnetgo.HandleCastPort)
 
+	// Redirect HTTP Requests to HTTPS
+	go http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect))
+
 	// Serve Web Requests
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", bcnetgo.HandleStatic)
@@ -56,8 +59,5 @@ func main() {
 		return
 	}
 	// Serve HTTPS Requests
-	log.Fatal(http.ListenAndServeTLS(":443", path.Join(store, "fullchain.pem"), path.Join(store, "privkey.pem"), mux))
-
-	// TODO Redirect HTTP Requests to HTTPS
-	// log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect)))
+	http.ListenAndServeTLS(":443", path.Join(store, "fullchain.pem"), path.Join(store, "privkey.pem"), mux)
 }
