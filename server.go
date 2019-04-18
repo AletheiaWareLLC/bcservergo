@@ -59,5 +59,5 @@ func main() {
 		return
 	}
 	// Serve HTTPS Requests
-	http.ListenAndServeTLS(":443", path.Join(store, "fullchain.pem"), path.Join(store, "privkey.pem"), mux)
+	log.Println(http.ListenAndServeTLS(":443", path.Join(store, "fullchain.pem"), path.Join(store, "privkey.pem"), mux))
 }
