@@ -17,47 +17,111 @@
 package main
 
 import (
+	"github.com/AletheiaWareLLC/aliasgo"
+	"github.com/AletheiaWareLLC/aliasservergo"
 	"github.com/AletheiaWareLLC/bcgo"
 	"github.com/AletheiaWareLLC/bcnetgo"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"path"
+	"time"
 )
 
 func main() {
-	logFile, err := bcnetgo.SetupLogging()
+	rootDir, err := bcgo.GetRootDirectory()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	//log.Println("Root Dir:", rootDir)
+
+	logFile, err := bcgo.SetupLogging(rootDir)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	defer logFile.Close()
+	//log.Println("Log File:", logFile.Name())
+
+	cacheDir, err := bcgo.GetCacheDirectory(rootDir)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	//log.Println("Cache Dir:", cacheDir)
+
+	cache, err := bcgo.NewFileCache(cacheDir)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	network := &bcgo.TcpNetwork{}
+
+	node, err := bcgo.GetNode(rootDir, cache, network)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	aliases := aliasgo.OpenAndLoadAliasChannel(cache, network)
+	node.AddChannel(aliases)
+
+	listener := &bcgo.PrintingMiningListener{os.Stdout}
 
 	// Serve Block Requests
-	go bcnetgo.Bind(bcgo.PORT_BLOCK, bcnetgo.HandleBlockPort)
+	go bcnetgo.Bind(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortHandler(cache, network))
 	// Serve Head Requests
-	go bcnetgo.Bind(bcgo.PORT_HEAD, bcnetgo.HandleHeadPort)
+	go bcnetgo.Bind(bcgo.PORT_GET_HEAD, bcnetgo.HeadPortHandler(cache, network))
 	// Serve Block Updates
-	go bcnetgo.Bind(bcgo.PORT_CAST, bcnetgo.HandleCastPort)
+	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(cache, network, func(name string) (bcgo.Channel, error) {
+		return node.GetChannel(name)
+	}))
 
 	// Redirect HTTP Requests to HTTPS
 	go http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect))
 
 	// Serve Web Requests
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", bcnetgo.HandleStatic)
-	mux.HandleFunc("/alias", bcnetgo.HandleAlias)
-	mux.HandleFunc("/alias-register", bcnetgo.HandleAliasRegister)
-	mux.HandleFunc("/block", bcnetgo.HandleBlock)
-	mux.HandleFunc("/channel", bcnetgo.HandleChannel)
-	ks := &bcnetgo.KeyStore{
-		Keys: make(map[string]*bcgo.KeyShare),
+	mux.HandleFunc("/", bcnetgo.StaticHandler)
+	aliasTemplate, err := template.ParseFiles("html/template/alias.html")
+	if err != nil {
+		log.Println(err)
+		return
 	}
-	mux.HandleFunc("/keys", ks.HandleKeys)
-	store, err := bcnetgo.GetSecurityStore()
+	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, cache, network, aliasTemplate))
+	aliasRegistrationTemplate, err := template.ParseFiles("html/template/alias-register.html")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	mux.HandleFunc("/alias-register", aliasservergo.AliasRegistrationHandler(node, listener, aliasRegistrationTemplate))
+	blockTemplate, err := template.ParseFiles("html/template/block.html")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	mux.HandleFunc("/block", bcnetgo.BlockHandler(cache, network, blockTemplate))
+	channelTemplate, err := template.ParseFiles("html/template/channel.html")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	mux.HandleFunc("/channel", bcnetgo.ChannelHandler(cache, network, channelTemplate))
+	channelListTemplate, err := template.ParseFiles("html/template/channel-list.html")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(cache, network, channelListTemplate, node.GetChannels))
+	mux.HandleFunc("/keys", bcnetgo.KeyShareHandler(make(bcnetgo.KeyShareStore), 2*time.Minute))
+	certDir, err := bcgo.GetCertificateDirectory(rootDir)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	// Serve HTTPS Requests
-	log.Println(http.ListenAndServeTLS(":443", path.Join(store, "fullchain.pem"), path.Join(store, "privkey.pem"), mux))
+	log.Println(http.ListenAndServeTLS(":443", path.Join(certDir, "fullchain.pem"), path.Join(certDir, "privkey.pem"), mux))
 }
