@@ -54,7 +54,7 @@ BC
     rsync $GOPATH/bin/bcclientgo-* your_server_alias@your_server_ip:~/bc/html/static/
 
     # Initialize BC
-    ALIAS=your_server_alias CACHE=~/bc/cache/ KEYSTORE=~/bc/keys/ LOGSTORE=~/bc/logs/ ~/bc/html/static/bcclient-linux-amd64 init
+    ALIAS=your_server_alias ROOT_DIRECTORY=~/bc/ ~/bc/html/static/bcclient-linux-amd64 init
 
     # Allow bcservergo to read security credentials
     chown -R your_server_alias:your_server_alias /etc/letsencrypt/
@@ -68,10 +68,8 @@ Service (Systemd)
     cat > /home/your_server_alias/bc/config <<EOF
     >ALIAS=your_server_alias
     >PASSWORD='VWXYZ'
-    >CACHE=cache/
-    >KEYSTORE=keys/
-    >LOGSTORE=logs/
-    >SECURITYSTORE=/etc/letsencrypt/live/your_server_domain/
+    >ROOT_DIRECTORY=/home/your_server_alias/bc/
+    >CERTIFICATE_DIRECTORY=/etc/letsencrypt/live/your_server_domain/
     >PEERS=bc.aletheiaware.com
     >EOF
 
