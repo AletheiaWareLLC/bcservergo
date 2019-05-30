@@ -91,13 +91,13 @@ func main() {
 		log.Println(err)
 		return
 	}
-	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, cache, network, aliasTemplate))
+	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, cache, aliasTemplate))
 	aliasRegistrationTemplate, err := template.ParseFiles("html/template/alias-register.html")
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	mux.HandleFunc("/alias-register", aliasservergo.AliasRegistrationHandler(node, listener, aliasRegistrationTemplate))
+	mux.HandleFunc("/alias-register", aliasservergo.AliasRegistrationHandler(aliases, node, listener, aliasRegistrationTemplate))
 	blockTemplate, err := template.ParseFiles("html/template/block.html")
 	if err != nil {
 		log.Println(err)
