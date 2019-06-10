@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <head>
+        <link rel="stylesheet" href="/styles.css">
+        <title>BC Usage - Aletheia Ware</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="/logo.svg" />
+                </a>
+            </div>
+
+            <h1>BC Usage</h1>
+
+            <h2>Environment</h2>
+            <p>
+                <ul>
+                    <li>
+                        <pre><code>$> ALIAS=alice ./bc</code></pre>
+                        <p>Sets the alias for BC to load from the keystore.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ROOT_DIRECTORY=/tmp/foobar ./bc</code></pre>
+                        <p>Sets the root directory for BC to use.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> CACHE_DIRECTORY=/tmp/cache ./bc</code></pre>
+                        <p>Sets the directory for BC to use for caching.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> DEBUG=true ./bc</code></pre>
+                        <p>Sets the debug flag for BC.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> KEYS_DIRECTORY=~/keys ./bc</code></pre>
+                        <p>Sets the directory for BC to use for storing keys.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> CERTIFICATE_DIRECTORY=~/certificates ./bc</code></pre>
+                        <p>Sets the directory for BC to use for storing certificates.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> LOG_DIRECTORY=/tmp/logs ./bc</code></pre>
+                        <p>Sets the directory for BC to use for logging.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> PASSWORD=password1234 ./bc</code></pre>
+                        <p>Sets the password for BC to unlock the private key from the keystore.</p>
+                        <p class="note">Note: This is NOT advisable as your password will be stored in the command history, it is more secure to enter your password at the prompt.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> PEERS=bc.aletheiaware.com,foobar.com ./bc</code></pre>
+                        <p>Sets the peers for BC to communicate with.</p>
+                    </li>
+                </ul>
+            </p>
+
+            <h2>Commands</h2>
+            <p>
+                <ul>
+                    <li>
+                        <pre><code>$> ./bc</code></pre>
+                        <p>Displays usage.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc init</code></pre>
+                        <p>Initializes environment, generates keys, and registers alias.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc node</code></pre>
+                        <p>Display registered alias and public key</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc alias [alias]</code></pre>
+                        <p>Displays the public key registered with the given alias</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc mine [channel] [threshold] [access...]</code></pre>
+                        <p>Reads data from stdin and mines a new block in the given channel to the given given threshold. If the access list is empty the payload is unencrypted, else the payload is encrypted and the listed aliases are granted access.</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc head [channel]</code></pre>
+                        <p>Displays the head of the given channel</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc block [channel] [hash]</code></pre>
+                        <p>Displays the block in the given channel with the given hash</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc record [channel] [hash]</code></pre>
+                        <p>Displays the record in the given channel with the given hash</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc registration [merchant]</code></pre>
+                        <p>Displays the registration information between this alias and the given merchant</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc subscription [merchant]</code></pre>
+                        <p>Displays the subscription information between this alias and the given merchant</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc pull [channel]</code></pre>
+                        <p>Pulls the given channel from peers</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc push [channel]</code></pre>
+                        <p>Pushes the given channel to peers</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc import-keys [alias] [access-code]</code></pre>
+                        <p>Import Alias Keys from another device</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc export-keys [alias]</code></pre>
+                        <p>Export Alias Keys to another device</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc keystore</code></pre>
+                        <p>Display location of keystore</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc peers</code></pre>
+                        <p>Display list of peers</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc add-peer [host]</code></pre>
+                        <p>Add given host to list of peers</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc cache</code></pre>
+                        <p>Display location of cache</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc purge</code></pre>
+                        <p>Purges all data from cache</p>
+                    </li>
+                    <li>
+                        <pre><code>$> ./bc random</code></pre>
+                        <p>Generate a random number</p>
+                    </li>
+                </ul>
+            </p>
+
+            <div class="footer">
+                <p>© 2019 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>

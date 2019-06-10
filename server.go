@@ -35,7 +35,14 @@ func main() {
 		log.Println(err)
 		return
 	}
-	//log.Println("Root Dir:", rootDir)
+	log.Println("Root Dir:", rootDir)
+
+	certDir, err := bcgo.GetCertificateDirectory(rootDir)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println("Certificate Directory:", certDir)
 
 	logFile, err := bcgo.SetupLogging(rootDir)
 	if err != nil {
@@ -43,14 +50,14 @@ func main() {
 		return
 	}
 	defer logFile.Close()
-	//log.Println("Log File:", logFile.Name())
+	log.Println("Log File:", logFile.Name())
 
 	cacheDir, err := bcgo.GetCacheDirectory(rootDir)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	//log.Println("Cache Dir:", cacheDir)
+	log.Println("Cache Dir:", cacheDir)
 
 	cache, err := bcgo.NewFileCache(cacheDir)
 	if err != nil {
@@ -58,7 +65,16 @@ func main() {
 		return
 	}
 
-	network := &bcgo.TcpNetwork{}
+	peers, err := bcgo.GetPeers(rootDir)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println("Peers:", peers)
+
+	network := &bcgo.TcpNetwork{
+		Peers: peers,
+	}
 
 	node, err := bcgo.GetNode(rootDir, cache, network)
 	if err != nil {
@@ -66,7 +82,7 @@ func main() {
 		return
 	}
 
-	aliases := aliasgo.OpenAndLoadAliasChannel(cache, network)
+	aliases := aliasgo.OpenAndPullAliasChannel(cache, network)
 	node.AddChannel(aliases)
 
 	listener := &bcgo.PrintingMiningListener{os.Stdout}
@@ -117,11 +133,6 @@ func main() {
 	}
 	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(cache, network, channelListTemplate, node.GetChannels))
 	mux.HandleFunc("/keys", bcnetgo.KeyShareHandler(make(bcnetgo.KeyShareStore), 2*time.Minute))
-	certDir, err := bcgo.GetCertificateDirectory(rootDir)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 	// Serve HTTPS Requests
 	log.Println(http.ListenAndServeTLS(":443", path.Join(certDir, "fullchain.pem"), path.Join(certDir, "privkey.pem"), mux))
 }

@@ -41,115 +41,33 @@
             </p>
 
             <h2>Initialize</h2>
-            <p>Generate your key pair consisting of a public key (which will be registered with your account) and a private key (which does not leave your possession).</p>
-            <pre><code>$> ./bc init</code></pre>
-            <samp>
-                Creating keystore under /Users/<strong>username</strong>/bc
-                <br/>
-                Enter keystore password:
-                <br/>
-                Confirm keystore password:
-                <br/>
-                Generating RSA 4096 Public/Private Key Pair
-                <br/>
-                Successfully Created Key Pair
-                <br/>
-                ...
-                <br/>
-                ...
-                <br/>
-                Initialized as <strong>username</strong>
-                <br>
-            </samp>
-
-            <h2>Sample Usage</h2>
-            <p>Environment
-                <ul>
-                    <li>
-                        <pre><code>$> ALIAS=alice ./bc</code></pre>
-                        <p>Sets the alias for BC to load from the keystore.</p>
-                    </li>
-                    <li>
-                        <pre><code>$> CACHE=/tmp/cache ./bc</code></pre>
-                        <p>Sets the directory for BC to use for caching.</p>
-                    </li>
-                    <li>
-                        <pre><code>$> KEYSTORE=~/keys ./bc</code></pre>
-                        <p>Sets the directory for BC to use for storing keys.</p>
-                    </li>
-                    <li>
-                        <pre><code>$> PASSWORD=password1234 ./bc</code></pre>
-                        <p>Sets the password for BC to unlock the private key from the keystore.</p>
-                        <p class="note">Note: This is NOT advisable as your password will be stored in the command history, it is more secure to enter your password at the prompt.</p>
-                    </li>
-                    <li>
-                        <pre><code>$> PEERS=bc.aletheiaware.com ./bc</code></pre>
-                        <p>Sets the peers for BC to communicate with.</p>
-                    </li>
-                </ul>
+            <p>Generate your key pair, consisting of a public key (which will be registered with your account) and a private key (which does not leave your possession).
+                <pre><code>$> ./bc init</code></pre>
+                <samp>
+                    Creating keystore under /Users/<strong>username</strong>/bc
+                    <br/>
+                    Enter keystore password:
+                    <br/>
+                    Confirm keystore password:
+                    <br/>
+                    Generating RSA 4096 Public/Private Key Pair
+                    <br/>
+                    Successfully Created Key Pair
+                    <br/>
+                    ...
+                    <br/>
+                    ...
+                    <br/>
+                    Initialized as <strong>username</strong>
+                    <br>
+                </samp>
             </p>
-            <p>Commands
+
+            <h2>More Information</h2>
+            <p>
                 <ul>
-                    <li>
-                        <pre><code>$> ./bc alias [alias]</code></pre>
-                        <p>Displays the public key registered with the given alias</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc block [channel] [hash]</code></pre>
-                        <p>Displays the block in the given channel with the given hash</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc head [channel]</code></pre>
-                        <p>Displays the head of the given channel</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc init</code></pre>
-                        <p>Initializes environment, generates keys, and registers alias.</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc node</code></pre>
-                        <p>Display registered alias and public key</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc record [channel] [hash]</code></pre>
-                        <p>Displays the record in the given channel with the given hash</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc sync [channel]</code></pre>
-                        <p>Synchronizes cache for the given channel</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc import-keys [alias] [access-code]</code></pre>
-                        <p>Import Alias Keys from another device</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc export-keys [alias]</code></pre>
-                        <p>Export Alias Keys to another device</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc keystore</code></pre>
-                        <p>Display location of keystore</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc peers</code></pre>
-                        <p>Display list of peers</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc add-peer [host]</code></pre>
-                        <p>Add given host to list of peers</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc cache</code></pre>
-                        <p>Display location of cache</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc purge</code></pre>
-                        <p>Purges all data from cache</p>
-                    </li>
-                    <li>
-                        <pre><code>$> ./bc random</code></pre>
-                        <p>Generate a random number</p>
-                    </li>
+                    <li><a href="/documentation/index.html">Documentation</a></li>
+                    <li><a href="/documentation/usage.html">Sample Usage</a></li>
                 </ul>
             </p>
 
