@@ -94,3 +94,21 @@ ul {
     margin: auto;
     padding: 10px;
 }
+.nav {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+.nav li {
+    display: inline;
+}
+.nav a {
+    color: black;
+    display: inline-block;
+    padding: 8px;
+    text-decoration: none;
+}
+.nav a:hover {
+    color: darkgrey;
+}
