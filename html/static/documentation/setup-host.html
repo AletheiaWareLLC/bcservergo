@@ -126,13 +126,13 @@
 
             <pre><code>
                 # Create bc config
-                cat > /home/your_server_username/bc/config <<EOF
-                >ALIAS=your_server_domain
-                >PASSWORD='VWXYZ'
-                >ROOT_DIRECTORY=/home/your_server_username/bc/
-                >CERTIFICATE_DIRECTORY=/etc/letsencrypt/live/your_server_domain/
-                >PEERS=bc.aletheiaware.com
-                >EOF
+                nano /home/your_server_username/bc/config
+
+                    ALIAS=your_server_domain
+                    PASSWORD='your_password'
+                    ROOT_DIRECTORY=/home/your_server_username/bc/
+                    CERTIFICATE_DIRECTORY=/etc/letsencrypt/live/your_server_domain/
+                    PEERS=bc.aletheiaware.com
             </code></pre>
 
             <h2>systemd</h2>
@@ -141,21 +141,21 @@
 
             <pre><code>
                 # Create bc service
-                cat > /etc/systemd/system/bc.service <<EOF
-                >[Unit]
-                >Description=BC Server
-                >[Service]
-                >User=your_server_username
-                >WorkingDirectory=/home/your_server_username/bc
-                >EnvironmentFile=/home/your_server_username/bc/config
-                >ExecStart=/home/your_server_username/bc/bcservergo-linux-amd64
-                >SuccessExitStatus=143
-                >TimeoutStopSec=10
-                >Restart=on-failure
-                >RestartSec=5
-                >[Install]
-                >WantedBy=multi-user.target
-                >EOF
+                sudo nano /etc/systemd/system/bc.service
+
+                    [Unit]
+                    Description=BC Server
+                    [Service]
+                    User=your_server_username
+                    WorkingDirectory=/home/your_server_username/bc
+                    EnvironmentFile=/home/your_server_username/bc/config
+                    ExecStart=/home/your_server_username/bc/bcservergo-linux-amd64
+                    SuccessExitStatus=143
+                    TimeoutStopSec=10
+                    Restart=on-failure
+                    RestartSec=5
+                    [Install]
+                    WantedBy=multi-user.target
 
                 # Reload daemon
                 systemctl daemon-reload
