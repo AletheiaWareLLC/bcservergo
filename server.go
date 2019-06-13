@@ -82,7 +82,13 @@ func main() {
 		return
 	}
 
-	aliases := aliasgo.OpenAndPullAliasChannel(cache, network)
+	aliases := aliasgo.OpenAliasChannel()
+	if err := bcgo.LoadHead(aliases, cache, network); err != nil {
+		log.Println(err)
+	}
+	if err := bcgo.Pull(aliases, cache, network); err != nil {
+		log.Println(err)
+	}
 	node.AddChannel(aliases)
 
 	listener := &bcgo.PrintingMiningListener{os.Stdout}
