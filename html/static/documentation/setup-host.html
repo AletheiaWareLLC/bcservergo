@@ -75,6 +75,18 @@
                 certbot certonly --standalone -d your_server_domain
             </code></pre>
 
+            <h2>Cron</h2>
+
+            <p>Cron can be used to trigger certificate renewal</p>
+
+            <pre><code>
+                # Open cron editor
+                sudo crontab -e
+
+                # Renew certificate on the first day of the week
+                * * * * 0 sudo certbot renew --pre-hook "systemctl stop bc" --post-hook "systemctl start bc"
+            </code></pre>
+
             <h2>BC</h2>
 
             <p>Create a directory</p>
