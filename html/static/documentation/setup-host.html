@@ -22,19 +22,19 @@
             <p>This guide will demonstrate how to setup BC on a remote server, such as a Digital Ocean Droplet running Ubuntu 18.04 x64.</p>
 
             <h2>Access</h2>
-            <p>Create a new droplet and ssh into the IP address<p>
+            <p>Create a new server and ssh as root into the IP address<p>
 
             <pre><code>
                 ssh root@your_server_ip
             </code></pre>
 
-            <p>Create a new user in the sudoers group</p>
+            <p>Create a new user and add them to the sudoers group</p>
 
             <pre><code>
-                # Create bc user
+                # Create user
                 adduser your_server_username
 
-                # Add bc user to sudoers
+                # Add user to sudoers
                 usermod -aG sudo your_server_username
             </code></pre>
 
@@ -96,14 +96,29 @@
                 mkdir -p /home/your_server_username/bc/
             </code></pre>
 
-            <p>Build BC and copy the files from your development machine to your server</p>
+            <p>Build BC on your development machine and copy the files to your server</p>
 
             <pre><code>
-                # Copy server binary
-                rsync $GOPATH/bin/bcservergo-linux-amd64 your_server_username@your_server_ip:~/bc/
+                # Build server
+                env GOOS=linux GOARCH=amd64 go build -o $GOPATH/bin/bcservergo-linux-amd64 github.com/AletheiaWareLLC/bcservergo
+
+                # Build clients
+                env GOOS=darwin GOARCH=386 go build -o $GOPATH/bin/bcclientgo-darwin-386 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=darwin GOARCH=amd64 go build -o $GOPATH/bin/bcclientgo-darwin-amd64 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=linux GOARCH=386 go build -o $GOPATH/bin/bcclientgo-linux-386 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=linux GOARCH=amd64 go build -o $GOPATH/bin/bcclientgo-linux-amd64 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=linux GOARCH=arm GOARM=5 go build -o $GOPATH/bin/bcclientgo-linux-arm5 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=linux GOARCH=arm GOARM=6 go build -o $GOPATH/bin/bcclientgo-linux-arm6 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=linux GOARCH=arm GOARM=7 go build -o $GOPATH/bin/bcclientgo-linux-arm7 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=linux GOARCH=arm64 go build -o $GOPATH/bin/bcclientgo-linux-arm8 github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=windows GOARCH=386 go build -o $GOPATH/bin/bcclientgo-windows-386.exe github.com/AletheiaWareLLC/bcclientgo
+                env GOOS=windows GOARCH=amd64 go build -o $GOPATH/bin/bcclientgo-windows-amd64.exe github.com/AletheiaWareLLC/bcclientgo
 
                 # Copy website content
                 rsync -r $GOPATH/src/github.com/AletheiaWareLLC/bcservergo/html your_server_username@your_server_ip:~/bc/
+
+                # Copy server binary
+                rsync $GOPATH/bin/bcservergo-linux-amd64 your_server_username@your_server_ip:~/bc/
 
                 # Copy client binaries into website static content
                 rsync $GOPATH/bin/bcclientgo-* your_server_username@your_server_ip:~/bc/html/static/
@@ -159,6 +174,9 @@
 
                 # Reload daemon
                 systemctl daemon-reload
+
+                # Enable service
+                systemctl enable bc
 
                 # Start service
                 systemctl start bc
