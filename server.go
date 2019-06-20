@@ -113,7 +113,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, cache, aliasTemplate))
+	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, cache, network, aliasTemplate))
 	aliasRegistrationTemplate, err := template.ParseFiles("html/template/alias-register.html")
 	if err != nil {
 		log.Println(err)
