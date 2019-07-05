@@ -6,7 +6,7 @@
 
     <head>
         <link rel="stylesheet" href="/styles.css">
-        <title>BC Host Setup - Aletheia Ware</title>
+        <title>BC - Host Setup - Aletheia Ware</title>
     </head>
 
     <body>
@@ -24,13 +24,13 @@
             <!-- TODO <p>The steps below can also be performed by a <a href="">script</a>.</p> -->
 
             <h2>Access</h2>
-            <p>Create a new server and ssh as root into the IP address<p>
+            <p>Create a new server and ssh as root into the IP address.<p>
 
             <pre><code>
                 ssh root@your_server_ip
             </code></pre>
 
-            <p>Create a new user and add them to the sudoers group</p>
+            <p>Create a new user and add them to the sudoers group.</p>
 
             <pre><code>
                 # Create user
@@ -39,11 +39,8 @@
                 # Add user to sudoers
                 usermod -aG sudo your_server_username
 
-                # Logout
-                exit
-
-                # Log back in as the new user
-                ssh your_server_username@your_server_ip
+                # Become the new user
+                su - your_server_username
             </code></pre>
 
             <h2>DNS</h2>
@@ -52,7 +49,7 @@
 
             <h2>Firewall</h2>
 
-            <p>Install a firewall such as UFW and open the ports used by HTTP, HTTPS, and BC</p>
+            <p>Install a firewall such as UFW and open the ports used by HTTP, HTTPS, and BC.</p>
 
             <pre><code>
                 # Install firewall
@@ -75,7 +72,7 @@
 
             <h2>HTTPS</h2>
 
-            <p>Use a Certificate Authority such as Let's Encrypt to generate a certificate</p>
+            <p>Use a Certificate Authority such as Let's Encrypt to generate a certificate.</p>
 
             <pre><code>
                 # Install certbot
@@ -90,7 +87,7 @@
 
             <h2>Cron</h2>
 
-            <p>Cron can be used to trigger certificate renewal</p>
+            <p>Cron can be used to trigger certificate renewal.</p>
 
             <pre><code>
                 # Open cron editor
@@ -102,7 +99,7 @@
 
             <h2>BC</h2>
 
-            <p>Create a directory</p>
+            <p>Create a directory to contain BC.</p>
 
             <pre><code>
                 # Create bc directory
@@ -147,7 +144,7 @@
                 rsync $GOPATH/bin/bcclientgo-* your_server_username@your_server_ip:~/bc/html/static/
             </code></pre>
 
-            <p>Initialize BC with your_server_domain as the alias</p>
+            <p>Initialize BC with your_server_domain as the alias.</p>
 
             <pre><code>
                 ALIAS=your_server_domain ROOT_DIRECTORY=~/bc/ PEERS=bc.aletheiaware.com ~/bc/html/static/bcclient-linux-amd64 init
@@ -157,7 +154,7 @@
                 sudo setcap CAP_NET_BIND_SERVICE=+eip /home/your_server_username/bc/bcservergo-linux-amd64
             </code></pre>
 
-            <p>Configure BC with your alias, password, root directory, certificate directory, and list of peers</p>
+            <p>Configure BC with your alias, password, root directory, certificate directory, and list of peers.</p>
 
             <pre><code>
                 # Create bc config
@@ -172,7 +169,7 @@
 
             <h2>systemd</h2>
 
-            <p>Setup BC as a service which is started at boot</p>
+            <p>Setup BC as a service which is started at boot.</p>
 
             <pre><code>
                 # Create bc service
