@@ -21,18 +21,26 @@
 
             <p>This guide will demonstrate how to setup BC on a remote server, such as a Digital Ocean Droplet running Ubuntu 18.04 x64.</p>
 
-            <!-- TODO <p>The steps below can also be performed by a <a href="">script</a>.</p> -->
+            <h2>DNS</h2>
 
-            <h2>Access</h2>
-            <p>Create a new server and ssh as root into the IP address.<p>
+            <p>The exact steps to configure DNS will depend on your domain name registrar, but typically involve adding a new "A Record" to associate your_server_domain to your server's IP address.</p>
+
+            <h2>Automatic Install</h2>
 
             <pre><code>
-                ssh root@your_server_ip
+                # ssh as root into the domain
+                ssh root@your_server_domain
+
+                # pipe the install script into bash
+                curl https://raw.githubusercontent.com/AletheiaWareLLC/bcservergo/master/setup-host.sh | sudo bash
             </code></pre>
 
-            <p>Create a new user and add them to the sudoers group.</p>
+            <h2>Manual Install</h2>
 
             <pre><code>
+                # ssh as root into the domain
+                ssh root@your_server_domain
+
                 # Create user
                 adduser your_server_username
 
@@ -43,11 +51,7 @@
                 su - your_server_username
             </code></pre>
 
-            <h2>DNS</h2>
-
-            <p>The exact steps to configure DNS will depend on your domain name registrar, but typically involve adding a new "A Record" to associate your_server_domain to your_server_ip.</p>
-
-            <h2>Firewall</h2>
+            <h3>Firewall</h3>
 
             <p>Install a firewall such as UFW and open the ports used by HTTP, HTTPS, and BC.</p>
 
@@ -70,7 +74,7 @@
                 sudo ufw enable
             </code></pre>
 
-            <h2>HTTPS</h2>
+            <h3>HTTPS</h3>
 
             <p>Use a Certificate Authority such as Let's Encrypt to generate a certificate.</p>
 
@@ -85,7 +89,7 @@
                 sudo chown -R your_server_username:your_server_username /etc/letsencrypt/
             </code></pre>
 
-            <h2>Cron</h2>
+            <h3>Cron</h3>
 
             <p>Cron can be used to trigger certificate renewal.</p>
 
@@ -97,51 +101,26 @@
                 * * * * 0 sudo certbot renew --pre-hook "systemctl stop bc" --post-hook "systemctl start bc"
             </code></pre>
 
-            <h2>BC</h2>
-
-            <p>Create a directory to contain BC.</p>
+            <h3>BC</h3>
 
             <pre><code>
                 # Create bc directory
                 mkdir -p /home/your_server_username/bc/
-            </code></pre>
 
-            <p>Build BC on your development machine and copy the files to your server.</p>
+                # Move into directory
+                cd /home/your_server_username/bc/
 
-            <p><a href="https://golang.org/doc/install">Install Go</a></p>
+                # Download server binary
+                curl -OL https://github.com/AletheiaWareLLC/bcservergo/releases/latest/download/bcservergo-linux-amd64
 
-            <pre><code>
-                # Download BC Client
-                go get github.com/AletheiaWareLLC/bcclientgo
-                # Download BC Server
-                go get github.com/AletheiaWareLLC/bcservergo
+                # Download website content
+                curl -OL https://github.com/AletheiaWareLLC/bcservergo/releases/latest/download/html.zip
 
-                # Build server
-                env GOOS=linux GOARCH=amd64 go build -o $GOPATH/bin/bcservergo-linux-amd64 github.com/AletheiaWareLLC/bcservergo
+                # Extract zip
+                unzip html.zip
 
-                # Build clients
-                env GOOS=darwin GOARCH=386 go build -o $GOPATH/bin/bcclientgo-darwin-386 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=darwin GOARCH=amd64 go build -o $GOPATH/bin/bcclientgo-darwin-amd64 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=linux GOARCH=386 go build -o $GOPATH/bin/bcclientgo-linux-386 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=linux GOARCH=amd64 go build -o $GOPATH/bin/bcclientgo-linux-amd64 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=linux GOARCH=arm GOARM=5 go build -o $GOPATH/bin/bcclientgo-linux-arm5 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=linux GOARCH=arm GOARM=6 go build -o $GOPATH/bin/bcclientgo-linux-arm6 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=linux GOARCH=arm GOARM=7 go build -o $GOPATH/bin/bcclientgo-linux-arm7 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=linux GOARCH=arm64 go build -o $GOPATH/bin/bcclientgo-linux-arm8 github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=windows GOARCH=386 go build -o $GOPATH/bin/bcclientgo-windows-386.exe github.com/AletheiaWareLLC/bcclientgo
-                env GOOS=windows GOARCH=amd64 go build -o $GOPATH/bin/bcclientgo-windows-amd64.exe github.com/AletheiaWareLLC/bcclientgo
-
-                # Install rsync
-                sudo apt install rsync
-
-                # Copy website content
-                rsync -r $GOPATH/src/github.com/AletheiaWareLLC/bcservergo/html your_server_username@your_server_ip:~/bc/
-
-                # Copy server binary
-                rsync $GOPATH/bin/bcservergo-linux-amd64 your_server_username@your_server_ip:~/bc/
-
-                # Copy client binaries into website static content
-                rsync $GOPATH/bin/bcclientgo-* your_server_username@your_server_ip:~/bc/html/static/
+                # Delete zip
+                rm html.zip
             </code></pre>
 
             <p>Initialize BC with your_server_domain as the alias.</p>
@@ -169,7 +148,7 @@
                     PEERS=bc.aletheiaware.com
             </code></pre>
 
-            <h2>systemd</h2>
+            <h3>systemd</h3>
 
             <p>Setup BC as a service which is started at boot.</p>
 
