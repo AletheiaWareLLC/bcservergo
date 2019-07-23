@@ -135,7 +135,15 @@ func main() {
 	}))
 
 	// Redirect HTTP Requests to HTTPS
-	go http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect))
+	go http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect(map[string]bool{
+		"/":               true,
+		"/alias":          true,
+		"/alias-register": true,
+		"/block":          true,
+		"/channel":        true,
+		"/channels":       true,
+		"/keys":           true,
+	})))
 
 	// Serve Web Requests
 	mux := http.NewServeMux()
