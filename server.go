@@ -17,18 +17,195 @@
 package main
 
 import (
+	"encoding/base64"
+	"fmt"
 	"github.com/AletheiaWareLLC/aliasgo"
 	"github.com/AletheiaWareLLC/aliasservergo"
 	"github.com/AletheiaWareLLC/bcgo"
 	"github.com/AletheiaWareLLC/bcnetgo"
 	"github.com/AletheiaWareLLC/financego"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"path"
 	"time"
 )
+
+type Server struct {
+	Root     string
+	Cert     string
+	Cache    *bcgo.FileCache
+	Network  bcgo.Network
+	Listener bcgo.MiningListener
+}
+
+func (s *Server) Init() (*bcgo.Node, error) {
+	// Add BC host to peers
+	if err := bcgo.AddPeer(s.Root, bcgo.GetBCHost()); err != nil {
+		return nil, err
+	}
+
+	// Create Node
+	node, err := bcgo.GetNode(s.Root, s.Cache, s.Network)
+	if err != nil {
+		return nil, err
+	}
+
+	// Register Alias
+	if err := aliasgo.Register(node, s.Listener); err != nil {
+		return nil, err
+	}
+
+	return node, nil
+}
+
+func (s *Server) Start(node *bcgo.Node) error {
+	aliases := aliasgo.OpenAliasChannel()
+	if err := bcgo.LoadHead(aliases, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	} else if err := bcgo.Pull(aliases, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	}
+	node.AddChannel(aliases)
+
+	charges := financego.OpenChargeChannel()
+	if err := bcgo.LoadHead(charges, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	} else if err := bcgo.Pull(charges, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	}
+	node.AddChannel(charges)
+
+	registrations := financego.OpenRegistrationChannel()
+	if err := bcgo.LoadHead(registrations, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	} else if err := bcgo.Pull(registrations, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	}
+	node.AddChannel(registrations)
+
+	subscriptions := financego.OpenSubscriptionChannel()
+	if err := bcgo.LoadHead(subscriptions, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	} else if err := bcgo.Pull(subscriptions, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	}
+	node.AddChannel(subscriptions)
+
+	usageRecords := financego.OpenUsageRecordChannel()
+	if err := bcgo.LoadHead(usageRecords, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	} else if err := bcgo.Pull(usageRecords, s.Cache, s.Network); err != nil {
+		log.Println(err)
+	}
+	node.AddChannel(usageRecords)
+
+	listener := &bcgo.PrintingMiningListener{os.Stdout}
+
+	// Serve Block Requests
+	go bcnetgo.Bind(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortHandler(s.Cache, s.Network))
+	// Serve Head Requests
+	go bcnetgo.Bind(bcgo.PORT_GET_HEAD, bcnetgo.HeadPortHandler(s.Cache, s.Network))
+	// Serve Block Updates
+	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(s.Cache, s.Network, func(name string) (bcgo.Channel, error) {
+		return node.GetChannel(name)
+	}))
+
+	// Redirect HTTP Requests to HTTPS
+	go http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect(map[string]bool{
+		"/":               true,
+		"/alias":          true,
+		"/alias-register": true,
+		"/block":          true,
+		"/channel":        true,
+		"/channels":       true,
+		"/keys":           true,
+	})))
+
+	// Serve Web Requests
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", bcnetgo.StaticHandler)
+	aliasTemplate, err := template.ParseFiles("html/template/alias.html")
+	if err != nil {
+		return err
+	}
+	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, s.Cache, s.Network, aliasTemplate))
+	aliasRegistrationTemplate, err := template.ParseFiles("html/template/alias-register.html")
+	if err != nil {
+		return err
+	}
+	mux.HandleFunc("/alias-register", aliasservergo.AliasRegistrationHandler(aliases, node, listener, aliasRegistrationTemplate))
+	blockTemplate, err := template.ParseFiles("html/template/block.html")
+	if err != nil {
+		return err
+	}
+	mux.HandleFunc("/block", bcnetgo.BlockHandler(s.Cache, s.Network, blockTemplate))
+	channelTemplate, err := template.ParseFiles("html/template/channel.html")
+	if err != nil {
+		return err
+	}
+	mux.HandleFunc("/channel", bcnetgo.ChannelHandler(s.Cache, s.Network, channelTemplate))
+	channelListTemplate, err := template.ParseFiles("html/template/channel-list.html")
+	if err != nil {
+		return err
+	}
+	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, s.Network, channelListTemplate, node.GetChannels))
+	mux.HandleFunc("/keys", bcnetgo.KeyShareHandler(make(bcnetgo.KeyShareStore), 2*time.Minute))
+	// Serve HTTPS Requests
+	return http.ListenAndServeTLS(":443", path.Join(s.Cert, "fullchain.pem"), path.Join(s.Cert, "privkey.pem"), mux)
+}
+
+func (s *Server) Handle(args []string) {
+	if len(args) > 0 {
+		switch args[0] {
+		case "init":
+			PrintLegalese(os.Stdout)
+			node, err := s.Init()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			log.Println("Initialized")
+			log.Println(node.Alias)
+			publicKeyBytes, err := bcgo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			log.Println(base64.RawURLEncoding.EncodeToString(publicKeyBytes))
+		case "start":
+			node, err := bcgo.GetNode(s.Root, s.Cache, s.Network)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			if err := s.Start(node); err != nil {
+				log.Println(err)
+				return
+			}
+		default:
+			log.Println("Cannot handle", args[0])
+		}
+	} else {
+		PrintUsage(os.Stdout)
+	}
+}
+
+func PrintUsage(output io.Writer) {
+	fmt.Fprintln(output, "BC Server Usage:")
+	fmt.Fprintln(output, "\tbcserver - display usage")
+	fmt.Fprintln(output, "\tbcserver init - initializes environment, generates key pair, and registers alias")
+	fmt.Fprintln(output)
+	fmt.Fprintln(output, "\tbcserver start - starts the server")
+}
+
+func PrintLegalese(output io.Writer) {
+	fmt.Fprintln(output, "BC Legalese:")
+	fmt.Fprintln(output, "BC is made available by Aletheia Ware LLC [https://aletheiaware.com] under the Terms of Service [https://aletheiaware.com/terms-of-service.html] and Privacy Policy [https://aletheiaware.com/privacy-policy.html].")
+	fmt.Fprintln(output, "By continuing to use this software you agree to the Terms of Service, and Privacy Policy.")
+}
 
 func main() {
 	rootDir, err := bcgo.GetRootDirectory()
@@ -77,108 +254,13 @@ func main() {
 		Peers: peers,
 	}
 
-	node, err := bcgo.GetNode(rootDir, cache, network)
-	if err != nil {
-		log.Println(err)
-		return
+	server := &Server{
+		Root:     rootDir,
+		Cert:     certDir,
+		Cache:    cache,
+		Network:  network,
+		Listener: &bcgo.PrintingMiningListener{os.Stdout},
 	}
 
-	aliases := aliasgo.OpenAliasChannel()
-	if err := bcgo.LoadHead(aliases, cache, network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(aliases, cache, network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(aliases)
-
-	charges := financego.OpenChargeChannel()
-	if err := bcgo.LoadHead(charges, cache, network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(charges, cache, network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(charges)
-
-	registrations := financego.OpenRegistrationChannel()
-	if err := bcgo.LoadHead(registrations, cache, network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(registrations, cache, network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(registrations)
-
-	subscriptions := financego.OpenSubscriptionChannel()
-	if err := bcgo.LoadHead(subscriptions, cache, network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(subscriptions, cache, network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(subscriptions)
-
-	usageRecords := financego.OpenUsageRecordChannel()
-	if err := bcgo.LoadHead(usageRecords, cache, network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(usageRecords, cache, network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(usageRecords)
-
-	listener := &bcgo.PrintingMiningListener{os.Stdout}
-
-	// Serve Block Requests
-	go bcnetgo.Bind(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortHandler(cache, network))
-	// Serve Head Requests
-	go bcnetgo.Bind(bcgo.PORT_GET_HEAD, bcnetgo.HeadPortHandler(cache, network))
-	// Serve Block Updates
-	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(cache, network, func(name string) (bcgo.Channel, error) {
-		return node.GetChannel(name)
-	}))
-
-	// Redirect HTTP Requests to HTTPS
-	go http.ListenAndServe(":80", http.HandlerFunc(bcnetgo.HTTPSRedirect(map[string]bool{
-		"/":               true,
-		"/alias":          true,
-		"/alias-register": true,
-		"/block":          true,
-		"/channel":        true,
-		"/channels":       true,
-		"/keys":           true,
-	})))
-
-	// Serve Web Requests
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", bcnetgo.StaticHandler)
-	aliasTemplate, err := template.ParseFiles("html/template/alias.html")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, cache, network, aliasTemplate))
-	aliasRegistrationTemplate, err := template.ParseFiles("html/template/alias-register.html")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	mux.HandleFunc("/alias-register", aliasservergo.AliasRegistrationHandler(aliases, node, listener, aliasRegistrationTemplate))
-	blockTemplate, err := template.ParseFiles("html/template/block.html")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	mux.HandleFunc("/block", bcnetgo.BlockHandler(cache, network, blockTemplate))
-	channelTemplate, err := template.ParseFiles("html/template/channel.html")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	mux.HandleFunc("/channel", bcnetgo.ChannelHandler(cache, network, channelTemplate))
-	channelListTemplate, err := template.ParseFiles("html/template/channel-list.html")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(cache, network, channelListTemplate, node.GetChannels))
-	mux.HandleFunc("/keys", bcnetgo.KeyShareHandler(make(bcnetgo.KeyShareStore), 2*time.Minute))
-	// Serve HTTPS Requests
-	log.Println(http.ListenAndServeTLS(":443", path.Join(certDir, "fullchain.pem"), path.Join(certDir, "privkey.pem"), mux))
+	server.Handle(os.Args[1:])
 }

@@ -147,7 +147,7 @@
             <p>Initialize BC with your_server_domain as the alias.</p>
 
             <pre><code>
-                ALIAS=your_server_domain ROOT_DIRECTORY=~/bc/ PEERS=bc.aletheiaware.com ~/bc/html/static/bcclient-linux-amd64 init
+                ALIAS=your_server_domain ROOT_DIRECTORY=~/bc/ PEERS=bc.aletheiaware.com ~/bc/bcserver-linux-amd64 init
 
                 # Allow bcservergo to bind to port 443 (HTTPS)
                 # This is required each time the server binary is updated
@@ -181,7 +181,7 @@
                     User=your_server_username
                     WorkingDirectory=/home/your_server_username/bc
                     EnvironmentFile=/home/your_server_username/bc/config
-                    ExecStart=/home/your_server_username/bc/bcservergo-linux-amd64
+                    ExecStart=/home/your_server_username/bc/bcservergo-linux-amd64 start
                     SuccessExitStatus=143
                     TimeoutStopSec=10
                     Restart=on-failure
