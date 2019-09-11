@@ -23,7 +23,6 @@ import (
 	"github.com/AletheiaWareLLC/aliasservergo"
 	"github.com/AletheiaWareLLC/bcgo"
 	"github.com/AletheiaWareLLC/bcnetgo"
-	"github.com/AletheiaWareLLC/financego"
 	"html/template"
 	"io"
 	"log"
@@ -69,38 +68,6 @@ func (s *Server) Start(node *bcgo.Node) error {
 		log.Println(err)
 	}
 	node.AddChannel(aliases)
-
-	charges := financego.OpenChargeChannel()
-	if err := bcgo.LoadHead(charges, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(charges, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(charges)
-
-	registrations := financego.OpenRegistrationChannel()
-	if err := bcgo.LoadHead(registrations, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(registrations, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(registrations)
-
-	subscriptions := financego.OpenSubscriptionChannel()
-	if err := bcgo.LoadHead(subscriptions, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(subscriptions, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(subscriptions)
-
-	usageRecords := financego.OpenUsageRecordChannel()
-	if err := bcgo.LoadHead(usageRecords, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	} else if err := bcgo.Pull(usageRecords, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(usageRecords)
 
 	listener := &bcgo.PrintingMiningListener{os.Stdout}
 
