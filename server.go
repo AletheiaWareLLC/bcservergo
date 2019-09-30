@@ -62,9 +62,10 @@ func (s *Server) Init() (*bcgo.Node, error) {
 
 func (s *Server) Start(node *bcgo.Node) error {
 	aliases := aliasgo.OpenAliasChannel()
-	if err := bcgo.LoadHead(aliases, s.Cache, s.Network); err != nil {
+	if err := bcgo.LoadCachedHead(aliases, s.Cache); err != nil {
 		log.Println(err)
-	} else if err := bcgo.Pull(aliases, s.Cache, s.Network); err != nil {
+	}
+	if err := bcgo.Pull(aliases, s.Cache, s.Network); err != nil {
 		log.Println(err)
 	}
 	node.AddChannel(aliases)
