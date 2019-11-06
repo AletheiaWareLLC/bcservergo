@@ -17,6 +17,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"fmt"
 	"github.com/AletheiaWareLLC/aliasgo"
@@ -122,7 +123,9 @@ func (s *Server) Start(node *bcgo.Node) error {
 	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, s.Network, channelListTemplate, node.GetChannels))
 	mux.HandleFunc("/keys", bcnetgo.KeyShareHandler(make(bcnetgo.KeyShareStore), 2*time.Minute))
 	// Serve HTTPS Requests
-	return http.ListenAndServeTLS(":443", path.Join(s.Cert, "fullchain.pem"), path.Join(s.Cert, "privkey.pem"), mux)
+	config := &tls.Config{MinVersion: tls.VersionTLS10}
+	server := &http.Server{Addr: ":443", Handler: mux, TLSConfig: config}
+	return server.ListenAndServeTLS(path.Join(s.Cert, "fullchain.pem"), path.Join(s.Cert, "privkey.pem"))
 }
 
 func (s *Server) Handle(args []string) {
