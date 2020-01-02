@@ -64,25 +64,30 @@ func (s *Server) Init() (*bcgo.Node, error) {
 }
 
 func (s *Server) Start(node *bcgo.Node) error {
+	// Open channels
 	aliases := aliasgo.OpenAliasChannel()
-	if err := bcgo.LoadCachedHead(aliases, s.Cache); err != nil {
-		log.Println(err)
-	}
-	if err := bcgo.Pull(aliases, s.Cache, s.Network); err != nil {
-		log.Println(err)
-	}
-	node.AddChannel(aliases)
 
-	listener := &bcgo.PrintingMiningListener{Output: os.Stdout}
+	for _, c := range []*bcgo.Channel{
+		aliases,
+	} {
+		// Load channel
+		if err := c.LoadCachedHead(s.Cache); err != nil {
+			log.Println(err)
+		}
+		// Pull channel
+		if err := c.Pull(s.Cache, s.Network); err != nil {
+			log.Println(err)
+		}
+		// Add channel to node
+		node.AddChannel(c)
+	}
 
 	// Serve Block Requests
 	go bcnetgo.Bind(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortHandler(s.Cache, s.Network))
 	// Serve Head Requests
 	go bcnetgo.Bind(bcgo.PORT_GET_HEAD, bcnetgo.HeadPortHandler(s.Cache, s.Network))
 	// Serve Block Updates
-	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(s.Cache, s.Network, func(name string) (bcgo.Channel, error) {
-		return node.GetChannel(name)
-	}))
+	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(s.Cache, s.Network, node.GetChannel))
 
 	// Redirect HTTP Requests to HTTPS
 	go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(map[string]bool{
@@ -107,7 +112,7 @@ func (s *Server) Start(node *bcgo.Node) error {
 	if err != nil {
 		return err
 	}
-	mux.HandleFunc("/alias-register", aliasservergo.AliasRegistrationHandler(aliases, node, listener, aliasRegistrationTemplate))
+	mux.HandleFunc("/alias-register", aliasservergo.AliasRegistrationHandler(aliases, node, aliasgo.ALIAS_THRESHOLD, s.Listener, aliasRegistrationTemplate))
 	blockTemplate, err := template.ParseFiles("html/template/block.html")
 	if err != nil {
 		return err
@@ -186,7 +191,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	log.Println("Root Dir:", rootDir)
+	log.Println("Root Directory:", rootDir)
 
 	logFile, err := bcgo.SetupLogging(rootDir)
 	if err != nil {
@@ -208,7 +213,7 @@ func main() {
 		log.Println(err)
 		return
 	}
-	log.Println("Cache Dir:", cacheDir)
+	log.Println("Cache Directory:", cacheDir)
 
 	cache, err := bcgo.NewFileCache(cacheDir)
 	if err != nil {
