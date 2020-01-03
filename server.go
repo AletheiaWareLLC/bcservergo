@@ -24,6 +24,7 @@ import (
 	"github.com/AletheiaWareLLC/aliasservergo"
 	"github.com/AletheiaWareLLC/bcgo"
 	"github.com/AletheiaWareLLC/bcnetgo"
+	"github.com/AletheiaWareLLC/cryptogo"
 	"github.com/AletheiaWareLLC/netgo"
 	"html/template"
 	"io"
@@ -72,7 +73,7 @@ func (s *Server) Start(node *bcgo.Node) error {
 	}
 	node.AddChannel(aliases)
 
-	listener := &bcgo.PrintingMiningListener{os.Stdout}
+	listener := &bcgo.PrintingMiningListener{Output: os.Stdout}
 
 	// Serve Block Requests
 	go bcnetgo.Bind(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortHandler(s.Cache, s.Network))
@@ -141,7 +142,7 @@ func (s *Server) Handle(args []string) {
 			}
 			log.Println("Initialized")
 			log.Println(node.Alias)
-			publicKeyBytes, err := bcgo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
+			publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
 			if err != nil {
 				log.Println(err)
 				return
@@ -231,7 +232,7 @@ func main() {
 		Cert:     certDir,
 		Cache:    cache,
 		Network:  network,
-		Listener: &bcgo.PrintingMiningListener{os.Stdout},
+		Listener: &bcgo.PrintingMiningListener{Output: os.Stdout},
 	}
 
 	server.Handle(os.Args[1:])

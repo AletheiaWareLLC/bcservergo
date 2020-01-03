@@ -18,7 +18,7 @@ set -e
 set -x
 
 go fmt $GOPATH/src/github.com/AletheiaWareLLC/*
-go test $GOPATH/src/github.com/AletheiaWareLLC/{aliasgo,aliasservergo,bcclientgo,bcgo,bcnetgo,bcservergo,financego}
+go test $GOPATH/src/github.com/AletheiaWareLLC/{aliasgo,aliasservergo,bcclientgo,bcgo,bcnetgo,bcservergo,cryptogo,financego}
 env GOOS=linux GOARCH=amd64 go build -o $GOPATH/bin/bcservergo-linux-amd64 github.com/AletheiaWareLLC/bcservergo
 
 (cd $GOPATH/src/github.com/AletheiaWareLLC/bcservergo/ && zip -r html.zip html)
