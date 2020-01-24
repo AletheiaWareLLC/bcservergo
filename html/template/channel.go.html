@@ -19,17 +19,17 @@
 
             <h1>BC</h1>
 
-            <table>
+            <table class="center" width="100%">
                 <tr>
-                    <td>Channel</td>
+                    <th style="text-align:right;">Channel</th>
                     <td>{{ .Channel }}</td>
                 </tr>
                 <tr>
-                    <td>Timestamp</td>
+                    <th style="text-align:right;">Timestamp</th>
                     <td>{{ .Timestamp }}</td>
                 </tr>
                 <tr>
-                    <td>Head</td>
+                    <th style="text-align:right;">Head</th>
                     <td><a href="block?channel={{ .Channel }}&hash={{ .Hash }}">{{ .Hash }}</a></td>
                 </tr>
             </table>

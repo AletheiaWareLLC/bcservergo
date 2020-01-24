@@ -19,7 +19,7 @@
 
             <h1>BC</h1>
 
-            <table>
+            <table class="center" width="100%">
                 <tr>
                     <th></th>
                     <th>Channel</th>
@@ -27,12 +27,12 @@
                     <th>Head</th>
                 </tr>
                 {{ range $key, $value := .Channel }}
-                <tr>
-                    <td>{{ $key }}
-                    <td>{{ $value.Name }}</td>
-                    <td>{{ $value.Timestamp }}</td>
-                    <td><a href="block?channel={{ $value.Name }}&hash={{ $value.Hash }}">{{ $value.Hash }}</a></td>
-                </tr>
+                    <tr>
+                        <td>{{ $key }}
+                        <td><a href="channel?channel={{ $value.Name }}">{{ $value.Name }}</a></td>
+                        <td>{{ $value.Timestamp }}</td>
+                        <td><a href="block?channel={{ $value.Name }}&hash={{ $value.Hash }}">{{ $value.Hash }}</a></td>
+                    </tr>
                 {{ end }}
             </table>
 
