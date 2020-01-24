@@ -90,7 +90,7 @@ func (s *Server) Start(node *bcgo.Node) error {
 	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(s.Cache, s.Network, node.GetChannel))
 
 	// Redirect HTTP Requests to HTTPS
-	go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(map[string]bool{
+	go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(node.Alias, map[string]bool{
 		"/":               true,
 		"/alias":          true,
 		"/alias-register": true,
