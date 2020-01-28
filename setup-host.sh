@@ -94,6 +94,7 @@ ALIAS=${DOMAIN}
 PASSWORD='${PASSWORD}'
 ROOT_DIRECTORY=/home/${USERNAME}/bc/
 CERTIFICATE_DIRECTORY=/etc/letsencrypt/live/${DOMAIN}/
+LIVE=true
 EOT
 chmod 600 /home/${USERNAME}/bc/config
 
