@@ -205,10 +205,10 @@ func (s *Server) Handle(args []string) {
 
 func PrintUsage(output io.Writer) {
 	fmt.Fprintln(output, "BC Server Usage:")
-	fmt.Fprintln(output, "\tbcserver - display usage")
-	fmt.Fprintln(output, "\tbcserver init - initializes environment, generates key pair, and registers alias")
+	fmt.Fprintf(output, "\t%s - display usage\n", os.Args[0])
+	fmt.Fprintf(output, "\t%s init - initializes environment, generates key pair, and registers alias\n", os.Args[0])
 	fmt.Fprintln(output)
-	fmt.Fprintln(output, "\tbcserver start - starts the server")
+	fmt.Fprintf(output, "\t%s start - starts the server\n", os.Args[0])
 }
 
 func PrintLegalese(output io.Writer) {
