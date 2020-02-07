@@ -115,17 +115,6 @@ func (s *Server) Start(node *bcgo.Node) error {
 	// Serve Block Updates
 	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(s.Cache, s.Network, node.GetChannel))
 
-	// Redirect HTTP Requests to HTTPS
-	go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(node.Alias, map[string]bool{
-		"/":               true,
-		"/alias":          true,
-		"/alias-register": true,
-		"/block":          true,
-		"/channel":        true,
-		"/channels":       true,
-		"/keys":           true,
-	})))
-
 	// Serve Web Requests
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", netgo.StaticHandler("html/static"))
@@ -155,10 +144,27 @@ func (s *Server) Start(node *bcgo.Node) error {
 	}
 	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, s.Network, channelListTemplate, node.GetChannels))
 	mux.HandleFunc("/keys", cryptogo.KeyShareHandler(make(cryptogo.KeyShareStore), 2*time.Minute))
-	// Serve HTTPS Requests
-	config := &tls.Config{MinVersion: tls.VersionTLS10}
-	server := &http.Server{Addr: ":443", Handler: mux, TLSConfig: config}
-	return server.ListenAndServeTLS(path.Join(s.Cert, "fullchain.pem"), path.Join(s.Cert, "privkey.pem"))
+
+	if bcgo.GetBooleanFlag("HTTPS") {
+		// Redirect HTTP Requests to HTTPS
+		go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(node.Alias, map[string]bool{
+			"/":               true,
+			"/alias":          true,
+			"/alias-register": true,
+			"/block":          true,
+			"/channel":        true,
+			"/channels":       true,
+			"/keys":           true,
+		})))
+
+		// Serve HTTPS Requests
+		config := &tls.Config{MinVersion: tls.VersionTLS10}
+		server := &http.Server{Addr: ":443", Handler: mux, TLSConfig: config}
+		return server.ListenAndServeTLS(path.Join(s.Cert, "fullchain.pem"), path.Join(s.Cert, "privkey.pem"))
+	} else {
+		log.Println("HTTP Server Listening on :80")
+		return http.ListenAndServe(":80", mux)
+	}
 }
 
 func (s *Server) Handle(args []string) {
