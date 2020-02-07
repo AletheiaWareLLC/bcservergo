@@ -19,6 +19,7 @@ package main
 import (
 	"crypto/tls"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"github.com/AletheiaWareLLC/aliasgo"
 	"github.com/AletheiaWareLLC/aliasservergo"
@@ -32,7 +33,14 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
+	"strings"
 	"time"
+)
+
+var (
+	channel = flag.String("channel", "", "BC channel")
+	peer    = flag.String("peer", "", "BC peer")
 )
 
 type Server struct {
@@ -44,11 +52,6 @@ type Server struct {
 }
 
 func (s *Server) Init() (*bcgo.Node, error) {
-	// Add BC host to peers
-	if err := bcgo.AddPeer(s.Root, bcgo.GetBCHost()); err != nil {
-		return nil, err
-	}
-
 	// Create Node
 	node, err := bcgo.GetNode(s.Root, s.Cache, s.Network)
 	if err != nil {
@@ -67,9 +70,32 @@ func (s *Server) Start(node *bcgo.Node) error {
 	// Open channels
 	aliases := aliasgo.OpenAliasChannel()
 
-	for _, c := range []*bcgo.Channel{
+	channels := []*bcgo.Channel{
 		aliases,
-	} {
+	}
+	if *channel != "" {
+		for _, c := range bcgo.SplitRemoveEmpty(*channel, ",") {
+			parts := strings.Split(c, ":")
+			if len(parts) > 0 {
+				name := parts[0]
+				if name != aliasgo.ALIAS {
+					if len(parts) > 1 {
+						threshold, err := strconv.Atoi(parts[1])
+						if err != nil {
+							return err
+						}
+						channels = append(channels, bcgo.OpenPoWChannel(name, uint64(threshold)))
+					} else {
+						channels = append(channels, &bcgo.Channel{
+							Name: name,
+						})
+					}
+				}
+			}
+		}
+	}
+
+	for _, c := range channels {
 		// Load channel
 		if err := c.LoadCachedHead(s.Cache); err != nil {
 			log.Println(err)
@@ -186,6 +212,16 @@ func PrintLegalese(output io.Writer) {
 }
 
 func main() {
+	// Parse command line flags
+	flag.Parse()
+
+	// Load config files (if any)
+	err := bcgo.LoadConfig()
+	if err != nil {
+		log.Fatal("Could not load config:", err)
+	}
+
+	// Get root directory
 	rootDir, err := bcgo.GetRootDirectory()
 	if err != nil {
 		log.Println(err)
@@ -193,6 +229,7 @@ func main() {
 	}
 	log.Println("Root Directory:", rootDir)
 
+	// Setup logging
 	logFile, err := bcgo.SetupLogging(rootDir)
 	if err != nil {
 		log.Println(err)
@@ -201,6 +238,7 @@ func main() {
 	defer logFile.Close()
 	log.Println("Log File:", logFile.Name())
 
+	// Get certificate directory
 	certDir, err := bcgo.GetCertificateDirectory(rootDir)
 	if err != nil {
 		log.Println(err)
@@ -208,6 +246,7 @@ func main() {
 	}
 	log.Println("Certificate Directory:", certDir)
 
+	// Get cache directory
 	cacheDir, err := bcgo.GetCacheDirectory(rootDir)
 	if err != nil {
 		log.Println(err)
@@ -215,19 +254,29 @@ func main() {
 	}
 	log.Println("Cache Directory:", cacheDir)
 
+	// Create file cache
 	cache, err := bcgo.NewFileCache(cacheDir)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	peers, err := bcgo.GetPeers(rootDir)
-	if err != nil {
-		log.Println(err)
-		return
+	var peers []string
+	if *peer == "" {
+		// Get peers
+		peers, err = bcgo.GetPeers(rootDir)
+		if err != nil {
+			log.Fatal("Could not get network peers:", err)
+		}
+		if len(peers) == 0 {
+			peers = append(peers, bcgo.GetBCHost())
+		}
+	} else {
+		peers = bcgo.SplitRemoveEmpty(*peer, ",")
 	}
 	log.Println("Peers:", peers)
 
+	// Create network of peers
 	network := &bcgo.TcpNetwork{
 		Peers: peers,
 	}
@@ -240,5 +289,5 @@ func main() {
 		Listener: &bcgo.PrintingMiningListener{Output: os.Stdout},
 	}
 
-	server.Handle(os.Args[1:])
+	server.Handle(flag.Args())
 }
