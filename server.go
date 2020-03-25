@@ -47,7 +47,7 @@ type Server struct {
 	Root     string
 	Cert     string
 	Cache    *bcgo.FileCache
-	Network  bcgo.Network
+	Network  *bcgo.TCPNetwork
 	Listener bcgo.MiningListener
 }
 
@@ -109,11 +109,11 @@ func (s *Server) Start(node *bcgo.Node) error {
 	}
 
 	// Serve Block Requests
-	go bcnetgo.Bind(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortHandler(s.Cache, s.Network))
+	go bcnetgo.BindTCP(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortTCPHandler(s.Cache, s.Network))
 	// Serve Head Requests
-	go bcnetgo.Bind(bcgo.PORT_GET_HEAD, bcnetgo.HeadPortHandler(s.Cache, s.Network))
+	go bcnetgo.BindTCP(bcgo.PORT_GET_HEAD, bcnetgo.HeadPortTCPHandler(s.Cache, s.Network))
 	// Serve Block Updates
-	go bcnetgo.Bind(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortHandler(s.Cache, s.Network, node.GetChannel))
+	go bcnetgo.BindTCP(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortTCPHandler(s.Cache, s.Network, node.GetChannel))
 
 	// Serve Web Requests
 	mux := http.NewServeMux()
@@ -283,9 +283,7 @@ func main() {
 	log.Println("Peers:", peers)
 
 	// Create network of peers
-	network := &bcgo.TcpNetwork{
-		Peers: peers,
-	}
+	network := bcgo.NewTCPNetwork(peers...)
 
 	server := &Server{
 		Root:     rootDir,
