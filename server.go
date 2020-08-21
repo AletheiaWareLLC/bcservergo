@@ -108,12 +108,8 @@ func (s *Server) Start(node *bcgo.Node) error {
 		node.AddChannel(c)
 	}
 
-	// Serve Block Requests
-	go bcnetgo.BindTCP(bcgo.PORT_GET_BLOCK, bcnetgo.BlockPortTCPHandler(s.Cache, s.Network))
-	// Serve Head Requests
-	go bcnetgo.BindTCP(bcgo.PORT_GET_HEAD, bcnetgo.HeadPortTCPHandler(s.Cache, s.Network))
-	// Serve Block Updates
-	go bcnetgo.BindTCP(bcgo.PORT_BROADCAST, bcnetgo.BroadcastPortTCPHandler(s.Cache, s.Network, node.GetChannel))
+	// Serve BC Requests
+	bcnetgo.BindAllTCP(node.Cache, node.Network.(*bcgo.TCPNetwork), node.GetChannel)
 
 	// Serve Web Requests
 	mux := http.NewServeMux()
