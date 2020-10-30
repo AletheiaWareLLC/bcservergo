@@ -53,7 +53,7 @@ type Server struct {
 
 func (s *Server) Init() (*bcgo.Node, error) {
 	// Create Node
-	node, err := bcgo.GetNode(s.Root, s.Cache, s.Network)
+	node, err := bcgo.NewNode(s.Root, s.Cache, s.Network)
 	if err != nil {
 		return nil, err
 	}
@@ -86,9 +86,7 @@ func (s *Server) Start(node *bcgo.Node) error {
 						}
 						channels = append(channels, bcgo.OpenPoWChannel(name, uint64(threshold)))
 					} else {
-						channels = append(channels, &bcgo.Channel{
-							Name: name,
-						})
+						channels = append(channels, bcgo.NewChannel(name))
 					}
 				}
 			}
@@ -177,7 +175,7 @@ func (s *Server) Handle(args []string) {
 			}
 			log.Println(base64.RawURLEncoding.EncodeToString(publicKeyBytes))
 		case "start":
-			node, err := bcgo.GetNode(s.Root, s.Cache, s.Network)
+			node, err := bcgo.NewNode(s.Root, s.Cache, s.Network)
 			if err != nil {
 				log.Println(err)
 				return
