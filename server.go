@@ -264,7 +264,14 @@ func main() {
 			log.Fatal("Could not get network peers:", err)
 		}
 		if len(peers) == 0 {
-			peers = append(peers, bcgo.GetBCHost())
+			host := bcgo.GetBCHost()
+			alias, err := bcgo.GetAlias()
+			if err != nil {
+				log.Println(err)
+			}
+			if host != alias {
+				peers = append(peers, host)
+			}
 		}
 	} else {
 		peers = bcgo.SplitRemoveEmpty(*peer, ",")
