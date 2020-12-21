@@ -47,9 +47,10 @@ sudo ufw allow 80
 sudo ufw allow 443
 
 # Allow bc ports
-sudo ufw allow 22222
-sudo ufw allow 22322
-sudo ufw allow 23232
+sudo ufw allow 22022 # connect port
+sudo ufw allow 22222 # get block port
+sudo ufw allow 22322 # get head port
+sudo ufw allow 23232 # broadcast port
 
 # Enable firewall
 sudo ufw enable
@@ -82,7 +83,7 @@ unzip html.zip
 rm html.zip
 
 # Initialize BC
-ALIAS=${DOMAIN} PASSWORD=${PASSWORD} ROOT_DIRECTORY=~/bc/ ./bcservergo-linux-amd64 init
+ALIAS=${DOMAIN} PASSWORD=${PASSWORD} ROOT_DIRECTORY=~/bc/ LIVE=${LIVE} ./bcservergo-linux-amd64 init
 
 # Allow bcservergo to bind to port 443 (HTTPS)
 # This is required each time the server binary is updated
@@ -94,7 +95,8 @@ ALIAS=${DOMAIN}
 PASSWORD='${PASSWORD}'
 ROOT_DIRECTORY=/home/${USERNAME}/bc/
 CERTIFICATE_DIRECTORY=/etc/letsencrypt/live/${DOMAIN}/
-LIVE=true
+LIVE=${LIVE}
+HTTPS=${HTTPS}
 EOT
 chmod 600 /home/${USERNAME}/bc/config
 
