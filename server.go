@@ -111,7 +111,7 @@ func (s *Server) Start(node *bcgo.Node) error {
 	if err != nil {
 		return err
 	}
-	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, s.Cache, s.Network, aliasTemplate))
+	mux.HandleFunc("/alias", aliasservergo.AliasHandler(aliases, s.Cache, aliasTemplate))
 	aliasRegistrationTemplate, err := template.ParseFiles("html/template/alias-register.go.html")
 	if err != nil {
 		return err
@@ -121,17 +121,17 @@ func (s *Server) Start(node *bcgo.Node) error {
 	if err != nil {
 		return err
 	}
-	mux.HandleFunc("/block", bcnetgo.BlockHandler(s.Cache, s.Network, blockTemplate))
+	mux.HandleFunc("/block", bcnetgo.BlockHandler(s.Cache, blockTemplate))
 	channelTemplate, err := template.ParseFiles("html/template/channel.go.html")
 	if err != nil {
 		return err
 	}
-	mux.HandleFunc("/channel", bcnetgo.ChannelHandler(s.Cache, s.Network, channelTemplate))
+	mux.HandleFunc("/channel", bcnetgo.ChannelHandler(s.Cache, channelTemplate))
 	channelListTemplate, err := template.ParseFiles("html/template/channel-list.go.html")
 	if err != nil {
 		return err
 	}
-	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, s.Network, channelListTemplate, node.GetChannels))
+	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, channelListTemplate, node.GetChannels))
 	mux.HandleFunc("/keys", cryptogo.KeyShareHandler(make(cryptogo.KeyShareStore), 2*time.Minute))
 
 	if bcgo.GetBooleanFlag("HTTPS") {
