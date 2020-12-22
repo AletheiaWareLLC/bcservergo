@@ -94,9 +94,11 @@ func (s *Server) Start(node *bcgo.Node) error {
 	}
 
 	for _, c := range channels {
-		if err := c.Refresh(s.Cache, s.Network); err != nil {
-			log.Println(err)
-		}
+		go func() {
+			if err := c.Refresh(s.Cache, s.Network); err != nil {
+				log.Println(err)
+			}
+		}()
 		// Add channel to node
 		node.AddChannel(c)
 	}

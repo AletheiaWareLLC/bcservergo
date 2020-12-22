@@ -3,14 +3,12 @@ github.com/AletheiaWareLLC/aliasgo v1.0.0 h1:BCUg0/9ii42WPDyIRzOAK6rc9IfEj9ggMIG
 github.com/AletheiaWareLLC/aliasgo v1.0.0/go.mod h1:nCbUhNHcAdD0NjQ7GhGhkX/0oY3t8ZnjOLwmEf2qvag=
 github.com/AletheiaWareLLC/aliasgo v1.0.1-0.20201220212058-7d46ad3c9880 h1:covBSvnOYaI7VjamOxXQKCkvU6ChTKzvHnL8ZTXVKeU=
 github.com/AletheiaWareLLC/aliasgo v1.0.1-0.20201220212058-7d46ad3c9880/go.mod h1:S91bsIU+FWC61wyq56Spm38gEliYkhdg3ozbTvE00X4=
-github.com/AletheiaWareLLC/aliasservergo v1.0.1-0.20201222162408-55ced4ddaed2 h1:vFFmlfyL6CQMyINvVfIb18wMD+vZ5IVuSapIahZpzxw=
-github.com/AletheiaWareLLC/aliasservergo v1.0.1-0.20201222162408-55ced4ddaed2/go.mod h1:U4jxGFmT2U8AAcCoY76tUx5ZZo9As9EVR/ExGSKKlvw=
+github.com/AletheiaWareLLC/aliasservergo v1.0.1-0.20201222181032-ad3c8967b462 h1:kweNxBwnuiQrMoEfdxDBsaumbSX2lqirbffvLpsFkdY=
+github.com/AletheiaWareLLC/aliasservergo v1.0.1-0.20201222181032-ad3c8967b462/go.mod h1:cW+mPUw/Dv08B5AhmcLa+s1WfGGnJZT32zD1HyAm900=
 github.com/AletheiaWareLLC/bcgo v1.0.0 h1:ENymsps4zEb1fuA4Z3tU2Gh7MC6X00gZuTTWbUv1B9g=
 github.com/AletheiaWareLLC/bcgo v1.0.0/go.mod h1:lSvGTkmUVYicsaX61D/LYJ9dbGqwLDw6TQRMm2hKdnk=
 github.com/AletheiaWareLLC/bcgo v1.0.1-0.20201220210928-3586645b309f h1:Pja97Cz6tXM88BsAvIo3k/XnhE8O2VKzlrZrJXDoXXw=
 github.com/AletheiaWareLLC/bcgo v1.0.1-0.20201220210928-3586645b309f/go.mod h1:lSvGTkmUVYicsaX61D/LYJ9dbGqwLDw6TQRMm2hKdnk=
-github.com/AletheiaWareLLC/bcgo v1.0.1-0.20201222161756-6c18c9567944 h1:P606EHbJwtGckAc17MoLIYpZkpvM/0DSxIjeJepOVL8=
-github.com/AletheiaWareLLC/bcgo v1.0.1-0.20201222161756-6c18c9567944/go.mod h1:lSvGTkmUVYicsaX61D/LYJ9dbGqwLDw6TQRMm2hKdnk=
 github.com/AletheiaWareLLC/bcgo v1.0.1-0.20201222172728-edf71ec969c7 h1:OAjV+JFH5ue9/qyGD0DOjSWtf2TQvab0YVdzGKbjYGI=
 github.com/AletheiaWareLLC/bcgo v1.0.1-0.20201222172728-edf71ec969c7/go.mod h1:lSvGTkmUVYicsaX61D/LYJ9dbGqwLDw6TQRMm2hKdnk=
 github.com/AletheiaWareLLC/bcnetgo v1.0.1-0.20201222174409-8504c6dc0322 h1:2UcvHBou+VNTzuCDsjlSukua/ilZT6bwmeo6EMr5oEY=
