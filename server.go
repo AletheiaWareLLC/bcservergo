@@ -17,16 +17,16 @@
 package main
 
 import (
+	"aletheiaware.com/aliasgo"
+	"aletheiaware.com/aliasservergo"
+	"aletheiaware.com/bcgo"
+	"aletheiaware.com/bcnetgo"
+	"aletheiaware.com/cryptogo"
+	"aletheiaware.com/netgo"
 	"crypto/tls"
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"github.com/AletheiaWareLLC/aliasgo"
-	"github.com/AletheiaWareLLC/aliasservergo"
-	"github.com/AletheiaWareLLC/bcgo"
-	"github.com/AletheiaWareLLC/bcnetgo"
-	"github.com/AletheiaWareLLC/cryptogo"
-	"github.com/AletheiaWareLLC/netgo"
 	"html/template"
 	"io"
 	"log"

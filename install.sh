@@ -17,6 +17,6 @@
 set -e
 set -x
 
-go fmt $GOPATH/src/github.com/AletheiaWareLLC/bcservergo
-go test $GOPATH/src/github.com/AletheiaWareLLC/bcservergo
-go install github.com/AletheiaWareLLC/bcservergo
+go fmt $GOPATH/src/aletheiaware.com/bcservergo
+go test $GOPATH/src/aletheiaware.com/bcservergo
+go install aletheiaware.com/bcservergo

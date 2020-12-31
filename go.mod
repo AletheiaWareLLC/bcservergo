@@ -1,12 +1,12 @@
-module github.com/AletheiaWareLLC/bcservergo
+module aletheiaware.com/bcservergo
 
 go 1.14
 
 require (
-	github.com/AletheiaWareLLC/aliasgo v1.0.1
-	github.com/AletheiaWareLLC/aliasservergo v1.0.1
-	github.com/AletheiaWareLLC/bcgo v1.0.1
-	github.com/AletheiaWareLLC/bcnetgo v1.0.1
-	github.com/AletheiaWareLLC/cryptogo v1.0.0
-	github.com/AletheiaWareLLC/netgo v1.0.0
+	aletheiaware.com/aliasgo v1.1.0
+	aletheiaware.com/aliasservergo v1.1.0
+	aletheiaware.com/bcgo v1.1.1
+	aletheiaware.com/bcnetgo v1.1.0
+	aletheiaware.com/cryptogo v1.1.0
+	aletheiaware.com/netgo v1.1.0
 )
