@@ -136,7 +136,7 @@ func (s *Server) Start(node *bcgo.Node) error {
 	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, channelListTemplate, node.GetChannels))
 	mux.HandleFunc("/keys", cryptogo.KeyShareHandler(make(cryptogo.KeyShareStore), 2*time.Minute))
 
-	if bcgo.GetBooleanFlag("HTTPS") {
+	if bcgo.GetBooleanFlag(netgo.HTTPS) {
 		// Redirect HTTP Requests to HTTPS
 		go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(node.Alias, map[string]bool{
 			"/":               true,
