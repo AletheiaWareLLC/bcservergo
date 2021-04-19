@@ -20,6 +20,11 @@ import (
 	"aletheiaware.com/aliasgo"
 	"aletheiaware.com/aliasservergo"
 	"aletheiaware.com/bcgo"
+	"aletheiaware.com/bcgo/account"
+	"aletheiaware.com/bcgo/cache"
+	"aletheiaware.com/bcgo/channel"
+	"aletheiaware.com/bcgo/network"
+	"aletheiaware.com/bcgo/node"
 	"aletheiaware.com/bcnetgo"
 	"aletheiaware.com/cryptogo"
 	"aletheiaware.com/netgo"
@@ -39,24 +44,27 @@ import (
 )
 
 var (
-	channel = flag.String("channel", "", "BC channel")
-	peer    = flag.String("peer", "", "BC peer")
+	c = flag.String("channel", "", "BC channel")
+	p = flag.String("peer", "", "BC peer")
 )
 
 type Server struct {
 	Root     string
 	Cert     string
-	Cache    *bcgo.FileCache
-	Network  *bcgo.TCPNetwork
+	Cache    *cache.FileSystem
+	Network  *network.TCP
 	Listener bcgo.MiningListener
 }
 
-func (s *Server) Init() (*bcgo.Node, error) {
-	// Create Node
-	node, err := bcgo.NewNode(s.Root, s.Cache, s.Network)
+func (s *Server) Init() (bcgo.Node, error) {
+	// Load Account
+	account, err := account.LoadRSA(s.Root)
 	if err != nil {
 		return nil, err
 	}
+
+	// Create Node
+	node := node.New(account, s.Cache, s.Network)
 
 	// Register Alias
 	if err := aliasgo.Register(node, s.Listener); err != nil {
@@ -66,15 +74,15 @@ func (s *Server) Init() (*bcgo.Node, error) {
 	return node, nil
 }
 
-func (s *Server) Start(node *bcgo.Node) error {
+func (s *Server) Start(node bcgo.Node) error {
 	// Open channels
 	aliases := aliasgo.OpenAliasChannel()
 
-	channels := []*bcgo.Channel{
+	channels := []bcgo.Channel{
 		aliases,
 	}
-	if *channel != "" {
-		for _, c := range bcgo.SplitRemoveEmpty(*channel, ",") {
+	if *c != "" {
+		for _, c := range bcgo.SplitRemoveEmpty(*c, ",") {
 			parts := strings.Split(c, ":")
 			if len(parts) > 0 {
 				name := parts[0]
@@ -84,9 +92,9 @@ func (s *Server) Start(node *bcgo.Node) error {
 						if err != nil {
 							return err
 						}
-						channels = append(channels, bcgo.OpenPoWChannel(name, uint64(threshold)))
+						channels = append(channels, channel.NewPoW(name, uint64(threshold)))
 					} else {
-						channels = append(channels, bcgo.NewChannel(name))
+						channels = append(channels, channel.New(name))
 					}
 				}
 			}
@@ -104,7 +112,7 @@ func (s *Server) Start(node *bcgo.Node) error {
 	}
 
 	// Serve BC Requests
-	bcnetgo.BindAllTCP(node.Cache, node.Network.(*bcgo.TCPNetwork), node.GetChannel)
+	bcnetgo.BindAllTCP(s.Cache, s.Network, node.Channel)
 
 	// Serve Web Requests
 	mux := http.NewServeMux()
@@ -133,12 +141,12 @@ func (s *Server) Start(node *bcgo.Node) error {
 	if err != nil {
 		return err
 	}
-	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, channelListTemplate, node.GetChannels))
+	mux.HandleFunc("/channels", bcnetgo.ChannelListHandler(s.Cache, channelListTemplate, node.Channels))
 	mux.HandleFunc("/keys", cryptogo.KeyShareHandler(make(cryptogo.KeyShareStore), 2*time.Minute))
 
-	if bcgo.GetBooleanFlag(netgo.HTTPS) {
+	if bcgo.BooleanFlag(netgo.HTTPS) {
 		// Redirect HTTP Requests to HTTPS
-		go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(node.Alias, map[string]bool{
+		go http.ListenAndServe(":80", http.HandlerFunc(netgo.HTTPSRedirect(node.Account().Alias(), map[string]bool{
 			"/":               true,
 			"/alias":          true,
 			"/alias-register": true,
@@ -169,20 +177,21 @@ func (s *Server) Handle(args []string) {
 				return
 			}
 			log.Println("Initialized")
-			log.Println(node.Alias)
-			publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&node.Key.PublicKey)
+			log.Println(node.Account().Alias())
+			bytes, format, err := node.Account().PublicKey()
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			log.Println(base64.RawURLEncoding.EncodeToString(publicKeyBytes))
+			log.Println(base64.RawURLEncoding.EncodeToString(bytes))
+			log.Println(format)
 		case "start":
-			node, err := bcgo.NewNode(s.Root, s.Cache, s.Network)
+			account, err := account.LoadRSA(s.Root)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			if err := s.Start(node); err != nil {
+			if err := s.Start(node.New(account, s.Cache, s.Network)); err != nil {
 				log.Println(err)
 				return
 			}
@@ -219,7 +228,7 @@ func main() {
 	}
 
 	// Get root directory
-	rootDir, err := bcgo.GetRootDirectory()
+	rootDir, err := bcgo.RootDirectory()
 	if err != nil {
 		log.Println(err)
 		return
@@ -236,7 +245,7 @@ func main() {
 	log.Println("Log File:", logFile.Name())
 
 	// Get certificate directory
-	certDir, err := bcgo.GetCertificateDirectory(rootDir)
+	certDir, err := bcgo.CertificateDirectory(rootDir)
 	if err != nil {
 		log.Println(err)
 		return
@@ -244,7 +253,7 @@ func main() {
 	log.Println("Certificate Directory:", certDir)
 
 	// Get cache directory
-	cacheDir, err := bcgo.GetCacheDirectory(rootDir)
+	cacheDir, err := bcgo.CacheDirectory(rootDir)
 	if err != nil {
 		log.Println(err)
 		return
@@ -252,22 +261,22 @@ func main() {
 	log.Println("Cache Directory:", cacheDir)
 
 	// Create file cache
-	cache, err := bcgo.NewFileCache(cacheDir)
+	cache, err := cache.NewFileSystem(cacheDir)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	var peers []string
-	if *peer == "" {
+	if *p == "" {
 		// Get peers
-		peers, err = bcgo.GetPeers(rootDir)
+		peers, err = bcgo.Peers(rootDir)
 		if err != nil {
 			log.Fatal("Could not get network peers:", err)
 		}
 		if len(peers) == 0 {
-			host := bcgo.GetBCHost()
-			alias, err := bcgo.GetAlias()
+			host := bcgo.BCHost()
+			alias, err := bcgo.Alias()
 			if err != nil {
 				log.Println(err)
 			}
@@ -276,12 +285,12 @@ func main() {
 			}
 		}
 	} else {
-		peers = bcgo.SplitRemoveEmpty(*peer, ",")
+		peers = bcgo.SplitRemoveEmpty(*p, ",")
 	}
 	log.Println("Peers:", peers)
 
 	// Create network of peers
-	network := bcgo.NewTCPNetwork(peers...)
+	network := network.NewTCP(peers...)
 
 	server := &Server{
 		Root:     rootDir,
