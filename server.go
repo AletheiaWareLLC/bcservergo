@@ -178,7 +178,7 @@ func (s *Server) Handle(args []string) {
 			}
 			log.Println("Initialized")
 			log.Println(node.Account().Alias())
-			bytes, format, err := node.Account().PublicKey()
+			format, bytes, err := node.Account().PublicKey()
 			if err != nil {
 				log.Println(err)
 				return
